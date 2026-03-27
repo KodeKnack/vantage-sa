@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function CVUpload() {
   const [file, setFile] = useState<File | null>(null);
@@ -13,21 +14,27 @@ export default function CVUpload() {
     setMessage(null);
 
     try {
+      const t = toast.loading("Uploading CV…");
       const form = new FormData();
       form.append("file", file);
       const res = await fetch("/api/cv/parse", { method: "POST", body: form });
       const json = (await res.json().catch(() => null)) as unknown;
       if (!res.ok) {
         setMessage("Upload failed.");
+        toast.dismiss(t);
+        toast.error("CV upload failed.");
       } else {
         const created =
           typeof json === "object" && json && "skillsCreated" in json
             ? String((json as { skillsCreated: unknown }).skillsCreated)
             : "?";
         setMessage(`Uploaded. Skills created: ${created}`);
+        toast.dismiss(t);
+        toast.success("CV uploaded. Skills imported.");
       }
     } catch {
       setMessage("Upload failed.");
+      toast.error("CV upload failed.");
     } finally {
       setIsUploading(false);
     }
@@ -62,4 +69,3 @@ export default function CVUpload() {
     </div>
   );
 }
-

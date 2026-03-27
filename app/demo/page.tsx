@@ -61,7 +61,7 @@ export default function DemoPage() {
         </div>
 
         <div className="mt-6 text-xs text-white/50">
-          Requires seeded users. Run <span className="font-mono">npm run db:setup</span>.
+          If NextAuth is enabled, run <span className="font-mono">npm run db:setup</span>.
         </div>
       </div>
     </main>

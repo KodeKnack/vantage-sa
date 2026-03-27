@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 
 type Question = {
   id: string;
@@ -140,9 +141,13 @@ export default function AptitudeGame() {
       });
       if (!res.ok) {
         setSubmitError("Score save failed. Try again.");
+        toast.error("Score save failed.");
+      } else {
+        toast.success("Great work! Score saved.");
       }
     } catch {
       setSubmitError("Score save failed. Check your connection and try again.");
+      toast.error("Score save failed.");
     } finally {
       setIsSubmitting(false);
     }

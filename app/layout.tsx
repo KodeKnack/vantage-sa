@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar"; // ← relative, always works
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "VantageSA — We validate CVs.",
@@ -17,6 +18,7 @@ export default function RootLayout({
       <body className="bg-[#0d0d0d] antialiased">
         <Navbar />
         {children}
+        <Toaster richColors position="bottom-right" />
       </body>
     </html>
   );

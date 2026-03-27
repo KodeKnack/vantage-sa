@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { TaskDefinition } from "@/lib/tasks";
+import { toast } from "sonner";
 
 type SubmitResponse =
   | { ok: true; isVerified: boolean; proofHash: string | null }
@@ -29,6 +30,7 @@ export default function ChallengeRunner({ task }: { task: TaskDefinition }) {
     setIsSubmitting(true);
     setResult(null);
     try {
+      const t = toast.loading("Checking submission…");
       const res = await fetch("/api/task/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -43,15 +45,22 @@ export default function ChallengeRunner({ task }: { task: TaskDefinition }) {
       const json = (await res.json().catch(() => null)) as ApiOk | null;
       if (!res.ok) {
         setResult({ error: "Submit failed." });
+        toast.dismiss(t);
+        toast.error("Task submit failed.");
       } else {
+        const passed = Boolean(json?.isVerified);
         setResult({
           ok: true,
-          isVerified: Boolean(json?.isVerified),
+          isVerified: passed,
           proofHash: typeof json?.proofHash === "string" ? json.proofHash : null,
         });
+        toast.dismiss(t);
+        if (passed) toast.success(`${task.skillName} verified! Passport updated.`);
+        else toast.warning("Not quite right. Try again.");
       }
     } catch {
       setResult({ error: "Submit failed." });
+      toast.error("Task submit failed.");
     } finally {
       setIsSubmitting(false);
     }
