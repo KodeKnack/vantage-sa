@@ -2,26 +2,35 @@
 
 import { signIn } from "next-auth/react";
 import { type FormEvent, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setIsSubmitting(true);
     setError(null);
 
+    const callbackUrl = searchParams.get("callbackUrl") ?? "/";
     const result = await signIn("credentials", {
       email,
       password,
-      redirect: true,
-      callbackUrl: "/",
+      redirect: false,
+      callbackUrl,
     });
 
-    if (result?.error) setError("Invalid credentials");
+    if (result?.error) {
+      setError("Invalid email or password");
+      setIsSubmitting(false);
+      return;
+    }
+    router.push(result?.url ?? callbackUrl);
     setIsSubmitting(false);
   }
 

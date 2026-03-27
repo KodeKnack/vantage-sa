@@ -22,10 +22,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
-
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -106,6 +102,7 @@ export default function Navbar() {
               <Link
                 key={href}
                 href={href}
+                onClick={() => setMobileOpen(false)}
                 className={`px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-150 ${
                   isActive
                     ? "text-white bg-white/[0.07]"
@@ -119,12 +116,14 @@ export default function Navbar() {
           <div className="mt-3 pt-3 border-t border-white/[0.06] flex flex-col gap-2">
             <Link
               href="/graduate-view"
+              onClick={() => setMobileOpen(false)}
               className="px-4 py-3 text-sm font-medium text-white/80 border border-white/[0.12] rounded-lg text-center hover:bg-white/[0.04] transition-colors"
             >
               Graduate view
             </Link>
             <Link
               href="/employer-portal"
+              onClick={() => setMobileOpen(false)}
               className="px-4 py-3 text-sm font-semibold text-[#0d0d0d] bg-[#3ddc84] rounded-lg text-center"
             >
               Employer portal

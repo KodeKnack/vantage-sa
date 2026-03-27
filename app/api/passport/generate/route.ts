@@ -47,53 +47,72 @@ export async function GET() {
     totalSkillCount,
   });
 
-  const doc = (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Vantage Digital Passport</Text>
-          <Text style={styles.subtitle}>
-            Generated {new Date().toISOString().slice(0, 10)}
-          </Text>
-        </View>
+  const generatedDate = new Date().toISOString().slice(0, 10);
+  const skillsView =
+    user.verifiedSkills.length === 0
+      ? React.createElement(Text, { style: styles.muted }, "No skills imported yet.")
+      : user.verifiedSkills.map((s) =>
+          React.createElement(
+            View,
+            { key: s.id, style: { marginTop: 6 } },
+            React.createElement(
+              View,
+              { style: styles.row },
+              React.createElement(
+                Text,
+                null,
+                `${s.isVerified ? "✓" : "⏳"} ${s.name}`,
+              ),
+              React.createElement(
+                Text,
+                { style: styles.muted },
+                s.proofHash ? `${s.proofHash.slice(0, 10)}…` : "",
+              ),
+            ),
+          ),
+        );
 
-        <View style={styles.section}>
-          <Text style={styles.label}>Graduate</Text>
-          <View style={styles.row}>
-            <Text>{user.name}</Text>
-            <Text style={styles.badge}>VPS {trustScore}</Text>
-          </View>
-          <Text style={styles.muted}>{user.email}</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.label}>Verified Skills</Text>
-          {user.verifiedSkills.length === 0 ? (
-            <Text style={styles.muted}>No skills imported yet.</Text>
-          ) : (
-            user.verifiedSkills.map((s) => (
-              <View key={s.id} style={{ marginTop: 6 }}>
-                <View style={styles.row}>
-                  <Text>
-                    {s.isVerified ? "✓" : "⏳"} {s.name}
-                  </Text>
-                  <Text style={styles.muted}>
-                    {s.proofHash ? s.proofHash.slice(0, 10) + "…" : ""}
-                  </Text>
-                </View>
-              </View>
-            ))
-          )}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.label}>Notes</Text>
-          <Text style={styles.muted}>
-            This is an MVP passport for the hackathon demo.
-          </Text>
-        </View>
-      </Page>
-    </Document>
+  const doc = React.createElement(
+    Document,
+    null,
+    React.createElement(
+      Page,
+      { size: "A4", style: styles.page },
+      React.createElement(
+        View,
+        { style: styles.header },
+        React.createElement(Text, { style: styles.title }, "Vantage Digital Passport"),
+        React.createElement(Text, { style: styles.subtitle }, `Generated ${generatedDate}`),
+      ),
+      React.createElement(
+        View,
+        { style: styles.section },
+        React.createElement(Text, { style: styles.label }, "Graduate"),
+        React.createElement(
+          View,
+          { style: styles.row },
+          React.createElement(Text, null, user.name),
+          React.createElement(Text, { style: styles.badge }, `VPS ${trustScore}`),
+        ),
+        React.createElement(Text, { style: styles.muted }, user.email),
+      ),
+      React.createElement(
+        View,
+        { style: styles.section },
+        React.createElement(Text, { style: styles.label }, "Verified Skills"),
+        skillsView,
+      ),
+      React.createElement(
+        View,
+        { style: styles.section },
+        React.createElement(Text, { style: styles.label }, "Notes"),
+        React.createElement(
+          Text,
+          { style: styles.muted },
+          "This is an MVP passport for the hackathon demo.",
+        ),
+      ),
+    ),
   );
 
   const pdfBuffer = await renderToBuffer(doc);
@@ -104,4 +123,3 @@ export async function GET() {
     },
   });
 }
-
