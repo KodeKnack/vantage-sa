@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
@@ -14,8 +15,33 @@ export default async function GraduateDashboardPage() {
         <div className="text-sm text-white/70">
           Next steps: upload CV, play the game, complete a micro-task, download passport.
         </div>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link
+            className="rounded-lg border border-white/15 bg-white/[0.04] px-4 py-2 text-sm text-white hover:bg-white/[0.06]"
+            href="/graduate/cv"
+          >
+            Upload CV
+          </Link>
+          <Link
+            className="rounded-lg border border-white/15 bg-white/[0.04] px-4 py-2 text-sm text-white hover:bg-white/[0.06]"
+            href="/graduate/game"
+          >
+            Play game
+          </Link>
+          <Link
+            className="rounded-lg bg-emerald-400 px-4 py-2 text-sm font-semibold text-black"
+            href="/graduate/challenge"
+          >
+            Start challenge
+          </Link>
+          <a
+            className="rounded-lg border border-white/15 bg-white/[0.04] px-4 py-2 text-sm text-white hover:bg-white/[0.06]"
+            href="/api/passport/generate"
+          >
+            Download passport (PDF)
+          </a>
+        </div>
       </div>
     </main>
   );
 }
-
