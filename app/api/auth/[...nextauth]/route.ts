@@ -6,7 +6,13 @@ import type { Role } from "@prisma/client";
 
 type AuthedUser = { id: string; name: string; email: string; role: Role };
 
+const nextAuthSecret = process.env.NEXTAUTH_SECRET?.trim() || undefined;
+if (process.env.NODE_ENV === "production" && !nextAuthSecret) {
+  throw new Error("NEXTAUTH_SECRET is required in production");
+}
+
 export const authOptions: NextAuthOptions = {
+  secret: nextAuthSecret,
   session: { strategy: "jwt" },
   providers: [
     CredentialsProvider({
