@@ -8,6 +8,22 @@ export default function DemoPage() {
 
   async function loginAs(role: "graduate" | "employer") {
     setBusy(role);
+    // If demo bypass is enabled, avoid NextAuth cookies entirely.
+    const bypassEnabled =
+      process.env.NEXT_PUBLIC_DEMO_BYPASS_AUTH === "1" &&
+      process.env.NODE_ENV !== "production";
+
+    if (bypassEnabled) {
+      await fetch("/api/demo/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: role === "graduate" ? "GRADUATE" : "EMPLOYER" }),
+      });
+      window.location.href =
+        role === "graduate" ? "/graduate/dashboard" : "/employer/dashboard";
+      return;
+    }
+
     await signIn("credentials", {
       email: role === "graduate" ? "graduate@demo.co.za" : "employer@demo.co.za",
       password: "Demo1234!",
@@ -51,4 +67,3 @@ export default function DemoPage() {
     </main>
   );
 }
-

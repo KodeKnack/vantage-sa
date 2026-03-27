@@ -1,13 +1,11 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getSession } from "@/lib/auth";
 import AptitudeGame from "@/components/game/AptitudeGame";
 
 export default async function GraduateGamePage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   if (!session) redirect("/login");
   if (session.user.role !== "GRADUATE") redirect("/");
 
   return <AptitudeGame />;
 }
-

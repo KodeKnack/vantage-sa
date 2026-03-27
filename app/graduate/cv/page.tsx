@@ -1,10 +1,9 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getSession } from "@/lib/auth";
 import CVUpload from "@/components/dashboard/CVUpload";
 
 export default async function GraduateCVPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   if (!session) redirect("/login");
   if (session.user.role !== "GRADUATE") redirect("/");
 
@@ -20,4 +19,3 @@ export default async function GraduateCVPage() {
     </main>
   );
 }
-
