@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getSession } from "@/lib/auth";
 
 export default async function GraduateViewPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   if (session?.user?.role === "GRADUATE") redirect("/graduate/dashboard");
   if (session?.user?.role === "EMPLOYER") redirect("/employer/dashboard");
 

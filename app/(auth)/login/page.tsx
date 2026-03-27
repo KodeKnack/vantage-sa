@@ -11,6 +11,26 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const bypassEnabled =
+    process.env.NEXT_PUBLIC_DEMO_BYPASS_AUTH === "1" &&
+    process.env.NODE_ENV !== "production";
+
+  async function bypassLogin(role: "GRADUATE" | "EMPLOYER") {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      await fetch("/api/demo/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role }),
+      });
+      router.push(role === "GRADUATE" ? "/graduate/dashboard" : "/employer/dashboard");
+    } catch {
+      setError("Demo bypass failed.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -46,6 +66,35 @@ export default function LoginPage() {
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
           Use your demo account credentials.
         </p>
+
+        {bypassEnabled ? (
+          <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3">
+            <div className="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-300">
+              Demo bypass enabled
+            </div>
+            <div className="mt-2 grid gap-2">
+              <button
+                type="button"
+                onClick={() => bypassLogin("GRADUATE")}
+                disabled={isSubmitting}
+                className="w-full rounded-lg bg-emerald-400 px-3 py-2 text-sm font-semibold text-black disabled:opacity-60"
+              >
+                {isSubmitting ? "Working…" : "Enter as Graduate"}
+              </button>
+              <button
+                type="button"
+                onClick={() => bypassLogin("EMPLOYER")}
+                disabled={isSubmitting}
+                className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 disabled:opacity-60 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
+              >
+                {isSubmitting ? "Working…" : "Enter as Employer"}
+              </button>
+            </div>
+            <div className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">
+              This skips NextAuth + Prisma and avoids JWT cookie issues.
+            </div>
+          </div>
+        ) : null}
 
         <div className="mt-5 space-y-3">
           <label className="block">
