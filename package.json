@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:migrate": "prisma migrate dev --name init",
+    "db:seed": "prisma db seed",
+    "db:setup": "prisma migrate dev --name init && prisma db seed"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",

@@ -6,8 +6,17 @@ import type { Role } from "@prisma/client";
 
 type AuthedUser = { id: string; name: string; email: string; role: Role };
 
-const nextAuthSecret = process.env.NEXTAUTH_SECRET?.trim() || undefined;
-if (process.env.NODE_ENV === "production" && !nextAuthSecret) {
+// NextAuth will crash with a JWT_SESSION_ERROR if NEXTAUTH_SECRET is set to "".
+// Sanitize the env var so an accidentally-empty value can’t break dev sessions.
+if ((process.env.NEXTAUTH_SECRET ?? "").trim() === "") {
+  delete process.env.NEXTAUTH_SECRET;
+}
+
+const nextAuthSecret =
+  process.env.NEXTAUTH_SECRET?.trim() ||
+  (process.env.NODE_ENV === "production" ? undefined : "dev-secret-change-me");
+
+if (process.env.NODE_ENV === "production" && !process.env.NEXTAUTH_SECRET?.trim()) {
   throw new Error("NEXTAUTH_SECRET is required in production");
 }
 
