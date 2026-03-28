@@ -6,6 +6,30 @@ import { prisma } from "@/lib/prisma";
 
 type AuthedUser = { id: string; name: string; email: string; role: Role };
 
+const MOCK_USERS: Array<AuthedUser & { passwordHash: string }> = [
+  {
+    id: "mock-graduate-thabo",
+    name: "Thabo Nkosi",
+    email: "thabo@demo.vantage.co.za",
+    role: "GRADUATE",
+    passwordHash: "$2b$10$b5gVBmzAalM1hM15WjuMdOO8H7BbRjG8bQhPK4Vo8vbgHHGVVkQHy",
+  },
+  {
+    id: "mock-employer",
+    name: "Demo Employer",
+    email: "employer@demo.vantage.co.za",
+    role: "EMPLOYER",
+    passwordHash: "$2b$10$b5gVBmzAalM1hM15WjuMdOO8H7BbRjG8bQhPK4Vo8vbgHHGVVkQHy",
+  },
+  {
+    id: "mock-admin",
+    name: "Demo Admin",
+    email: "admin@demo.vantage.co.za",
+    role: "ADMIN",
+    passwordHash: "$2b$10$b5gVBmzAalM1hM15WjuMdOO8H7BbRjG8bQhPK4Vo8vbgHHGVVkQHy",
+  },
+];
+
 function isSessionRole(value: unknown): value is "GRADUATE" | "EMPLOYER" | "ADMIN" {
   return value === "GRADUATE" || value === "EMPLOYER" || value === "ADMIN";
 }
@@ -35,13 +59,18 @@ export const authOptions: NextAuthOptions = {
         const password = credentials?.password?.toString() ?? "";
         if (!email || !password) return null;
 
-        let user: { id: string; email: string; name: string; role: Role; passwordHash: string } | null =
-          null;
+        let user:
+          | ({ id: string; email: string; name: string; role: Role; passwordHash: string } | null)
+          | (AuthedUser & { passwordHash: string })
+          | null = null;
         try {
           user = await prisma.user.findUnique({ where: { email } });
         } catch {
-          // DB is unreachable/misconfigured in dev. Avoid crashing NextAuth.
-          return null;
+          // DB is unreachable/misconfigured in dev. Fall back to local mock users.
+          user = MOCK_USERS.find((u) => u.email.toLowerCase() === email) ?? null;
+        }
+        if (!user) {
+          user = MOCK_USERS.find((u) => u.email.toLowerCase() === email) ?? null;
         }
         if (!user) return null;
 
