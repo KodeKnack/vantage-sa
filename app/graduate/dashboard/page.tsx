@@ -10,6 +10,10 @@ export default async function GraduateDashboardPage() {
   const session = await getSafeSession();
   if (!session) redirect("/login");
 
+  // Force mock data if no real data available
+  const userEmail = session.user.email ?? '';
+  const mockGrad = MOCK_GRADUATES.find(g => g.email === userEmail) ?? MOCK_GRADUATES[0];
+
   let aptitudeScore = 0;
   let verifiedSkillCount = 0;
   let totalSkillCount = 0;
@@ -27,17 +31,24 @@ export default async function GraduateDashboardPage() {
       skills = user.verifiedSkills ?? [];
       verifiedSkillCount = skills.filter((s) => s.isVerified).length;
       totalSkillCount = skills.length;
+      if (aptitudeScore === 0 && totalSkillCount === 0) {
+        aptitudeScore = mockGrad.aptitudeScore;
+        skills = mockGrad.skills;
+        verifiedSkillCount = mockGrad.skills.filter((s) => s.isVerified).length;
+        totalSkillCount = mockGrad.skills.length;
+        graduateName = mockGrad.name;
+        graduateEmail = mockGrad.email;
+      }
     } else {
       throw new Error('User not found');
     }
   } catch {
-    const mock = MOCK_GRADUATES.find((g) => g.email === graduateEmail) ?? MOCK_GRADUATES[0];
-    aptitudeScore = mock.aptitudeScore;
-    skills = mock.skills;
-    verifiedSkillCount = mock.skills.filter((s) => s.isVerified).length;
-    totalSkillCount = mock.skills.length;
-    graduateName = mock.name;
-    graduateEmail = mock.email;
+    aptitudeScore = mockGrad.aptitudeScore;
+    skills = mockGrad.skills;
+    verifiedSkillCount = mockGrad.skills.filter((s) => s.isVerified).length;
+    totalSkillCount = mockGrad.skills.length;
+    graduateName = mockGrad.name;
+    graduateEmail = mockGrad.email;
   }
 
   const vps = Math.min(100, Math.round(
@@ -84,7 +95,12 @@ export default async function GraduateDashboardPage() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
         <div className="rounded-2xl border border-white/10 bg-white/[0.03]">
-          <VPSRing vps={vps} />
+          <VPSRing
+            vps={vps}
+            aptitudeScore={aptitudeScore}
+            verifiedSkillCount={verifiedSkillCount}
+            totalSkillCount={totalSkillCount}
+          />
           <div className="border-t border-white/10 px-6 py-4 text-sm text-white/70">
             Aptitude score: <span className="font-mono text-white">{aptitudeScore}</span>
             <div className="mt-1">

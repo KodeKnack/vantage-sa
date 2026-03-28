@@ -1,6 +1,28 @@
 import { clampTo0_100 } from "@/lib/trust-score";
 
-export default function VPSRing({ vps }: { vps: number }) {
+export default function VPSRing({
+  vps,
+  aptitudeScore,
+  verifiedSkillCount,
+  totalSkillCount,
+}: {
+  vps: number;
+  aptitudeScore?: number;
+  verifiedSkillCount?: number;
+  totalSkillCount?: number;
+}) {
+  if (process.env.NODE_ENV !== "production") {
+    console.log(
+      "VPS ring received:",
+      vps,
+      "aptitude:",
+      aptitudeScore,
+      "verified:",
+      verifiedSkillCount,
+      "total:",
+      totalSkillCount,
+    );
+  }
   const value = clampTo0_100(Math.round(vps));
   const radius = 58;
   const circumference = 2 * Math.PI * radius;
@@ -52,4 +74,3 @@ export default function VPSRing({ vps }: { vps: number }) {
     </div>
   );
 }
-
