@@ -4,38 +4,46 @@ import { getSafeSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateTrustScore } from "@/lib/trust-score";
 import VPSRing from "@/components/dashboard/VPSRing";
+import { MOCK_GRADUATES } from '@/lib/mock-data';
 
 export default async function GraduateDashboardPage() {
   const session = await getSafeSession();
   if (!session) redirect("/login");
 
   let aptitudeScore = 0;
-  let verified = 0;
-  let total = 0;
-  let skills: Array<{ id: string; name: string; isVerified: boolean }> = [];
+  let verifiedSkillCount = 0;
+  let totalSkillCount = 0;
+  let skills: { id: string; name: string; isVerified: boolean; proofHash: string | null }[] = [];
+  let graduateName = session.user.name ?? 'Graduate';
+  let graduateEmail = session.user.email ?? '';
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { email: graduateEmail },
       include: { verifiedSkills: true },
     });
     if (user) {
       aptitudeScore = user.aptitudeScore ?? 0;
-      total = user.verifiedSkills.length;
-      verified = user.verifiedSkills.filter((s) => s.isVerified).length;
-      skills = user.verifiedSkills.map((s) => ({
-        id: s.id,
-        name: s.name,
-        isVerified: s.isVerified,
-      }));
+      skills = user.verifiedSkills ?? [];
+      verifiedSkillCount = skills.filter((s) => s.isVerified).length;
+      totalSkillCount = skills.length;
+    } else {
+      throw new Error('User not found');
     }
   } catch {
+    const mock = MOCK_GRADUATES.find((g) => g.email === graduateEmail) ?? MOCK_GRADUATES[0];
+    aptitudeScore = mock.aptitudeScore;
+    skills = mock.skills;
+    verifiedSkillCount = mock.skills.filter((s) => s.isVerified).length;
+    totalSkillCount = mock.skills.length;
+    graduateName = mock.name;
+    graduateEmail = mock.email;
   }
 
   const trustScore = calculateTrustScore({
     aptitudeScore,
-    verifiedSkillCount: verified,
-    totalSkillCount: total,
+    verifiedSkillCount,
+    totalSkillCount,
   });
 
   return (
@@ -43,7 +51,9 @@ export default async function GraduateDashboardPage() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold">Graduate dashboard</h1>
-          <p className="mt-2 text-white/60">Signed in as {session.user.email}</p>
+          <p className="mt-2 text-white/60">
+            Signed in as {graduateName} ({graduateEmail})
+          </p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Link
@@ -81,7 +91,7 @@ export default async function GraduateDashboardPage() {
             <div className="mt-1">
               Verified skills:{" "}
               <span className="font-mono text-white">
-                {verified}/{total || 0}
+                {verifiedSkillCount}/{totalSkillCount || 0}
               </span>
             </div>
           </div>
