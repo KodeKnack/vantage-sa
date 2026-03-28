@@ -1,164 +1,109 @@
-"use client";
+'use client';
 
-import { signIn } from "next-auth/react";
-import { type FormEvent, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { GraduationCap, Briefcase, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+
+const ROLES = [
+  {
+    key: 'graduate',
+    label: "I'm a Graduate",
+    description: 'Access your VPS dashboard, challenges & skill verification',
+    icon: GraduationCap,
+    email: 'thabo@demo.vantage.co.za',
+    password: 'Demo1234!',
+    redirect: '/graduate/dashboard',
+  },
+  {
+    key: 'employer',
+    label: "I'm an Employer",
+    description: 'Search verified talent & calculate hiring ROI',
+    icon: Briefcase,
+    email: 'employer@demo.vantage.co.za',
+    password: 'Demo1234!',
+    redirect: '/employer/dashboard',
+  },
+] as const;
 
 export default function LoginClient() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [bypassEnabled, setBypassEnabled] = useState<boolean>(false);
+  const [loading, setLoading] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/demo/enabled")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { enabled?: unknown } | null) => {
-        if (cancelled) return;
-        setBypassEnabled(data?.enabled === true);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setBypassEnabled(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  async function bypassLogin(role: "GRADUATE" | "EMPLOYER") {
-    setIsSubmitting(true);
-    setError(null);
+  const handleRoleSelect = async (role: (typeof ROLES)[number]) => {
+    setLoading(role.key);
     try {
-      const res = await fetch("/api/demo/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
+      const result = await signIn('credentials', {
+        email: role.email,
+        password: role.password,
+        redirect: false,
       });
-      if (!res.ok) {
-        setError("Demo bypass is disabled.");
+
+      if (result?.error) {
+        toast.error('Something went wrong. Please try again.');
+        setLoading(null);
         return;
       }
-      router.push(role === "GRADUATE" ? "/graduate/dashboard" : "/employer/dashboard");
+
+      router.push(role.redirect);
     } catch {
-      setError("Demo bypass failed.");
-    } finally {
-      setIsSubmitting(false);
+      toast.error('Something went wrong. Please try again.');
+      setLoading(null);
     }
-  }
-
-  async function onSubmit(event: FormEvent) {
-    event.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-
-    const callbackUrl = searchParams.get("callbackUrl") ?? "/";
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-      callbackUrl,
-    });
-
-    if (result?.error) {
-      setError("Invalid email or password");
-      setIsSubmitting(false);
-      return;
-    }
-    router.push(result?.url ?? callbackUrl);
-    setIsSubmitting(false);
-  }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-black px-6">
-      <form
-        onSubmit={onSubmit}
-        className="w-full max-w-sm rounded-2xl border border-black/10 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-zinc-950"
-      >
-        <h1 className="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
-          Sign in
-        </h1>
-        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Use your demo account credentials.
-        </p>
-
-        {bypassEnabled ? (
-          <div className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3">
-            <div className="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-300">
-              Demo bypass enabled
-            </div>
-            <div className="mt-2 grid gap-2">
-              <button
-                type="button"
-                onClick={() => bypassLogin("GRADUATE")}
-                disabled={isSubmitting}
-                className="w-full rounded-lg bg-emerald-400 px-3 py-2 text-sm font-semibold text-black disabled:opacity-60"
-              >
-                {isSubmitting ? "Working…" : "Enter as Graduate"}
-              </button>
-              <button
-                type="button"
-                onClick={() => bypassLogin("EMPLOYER")}
-                disabled={isSubmitting}
-                className="w-full rounded-lg border border-black/10 px-3 py-2 text-sm font-semibold text-zinc-900 hover:bg-zinc-50 disabled:opacity-60 dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/5"
-              >
-                {isSubmitting ? "Working…" : "Enter as Employer"}
-              </button>
-            </div>
-            <div className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">
-              This skips NextAuth + Prisma and avoids JWT cookie issues.
-            </div>
-          </div>
-        ) : null}
-
-        <div className="mt-5 space-y-3">
-          <label className="block">
-            <span className="text-sm text-zinc-700 dark:text-zinc-300">
-              Email
-            </span>
-            <input
-              className="mt-1 w-full rounded-lg border border-black/10 bg-transparent px-3 py-2 text-sm text-zinc-950 outline-none focus:ring-2 focus:ring-emerald-400/50 dark:border-white/10 dark:text-zinc-50"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </label>
-
-          <label className="block">
-            <span className="text-sm text-zinc-700 dark:text-zinc-300">
-              Password
-            </span>
-            <input
-              className="mt-1 w-full rounded-lg border border-black/10 bg-transparent px-3 py-2 text-sm text-zinc-950 outline-none focus:ring-2 focus:ring-emerald-400/50 dark:border-white/10 dark:text-zinc-50"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
-          </label>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 gap-10">
+      <div className="text-center">
+        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center font-bold text-white mx-auto mb-5 text-xl">
+          V
         </div>
+        <h1 className="text-3xl font-bold mb-2 tracking-tight">Who are you today?</h1>
+        <p className="text-muted-foreground text-sm">
+          Choose your role to continue — no credentials needed
+        </p>
+      </div>
 
-        {error ? (
-          <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400">
-            {error}
-          </div>
-        ) : null}
+      <div className="flex flex-col sm:flex-row gap-6 w-full max-w-2xl">
+        {ROLES.map((role) => {
+          const Icon = role.icon;
+          const isLoading = loading === role.key;
+          const isDisabled = loading !== null;
 
-        <button
-          className="mt-5 w-full rounded-lg bg-emerald-400 px-3 py-2 text-sm font-medium text-black disabled:opacity-60"
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
+          return (
+            <button
+              key={role.key}
+              onClick={() => handleRoleSelect(role)}
+              disabled={isDisabled}
+              className="
+                flex-1 rounded-2xl border border-border/50 bg-card p-8
+                flex flex-col items-center gap-4 text-center
+                transition-all duration-200
+                hover:scale-105 hover:border-teal-500/60
+                hover:shadow-[0_0_28px_rgba(20,184,166,0.2)]
+                disabled:opacity-60 disabled:cursor-not-allowed
+                disabled:hover:scale-100 disabled:hover:shadow-none
+                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500
+              "
+            >
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center">
+                {isLoading ? (
+                  <Loader2 className="h-8 w-8 text-white animate-spin" />
+                ) : (
+                  <Icon className="h-8 w-8 text-white" />
+                )}
+              </div>
+              <div>
+                <p className="font-bold text-xl mb-1">{role.label}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {role.description}
+                </p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
