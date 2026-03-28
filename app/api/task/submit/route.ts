@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Role, TaskType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth";
+import { requireRole } from "@/lib/require-role";
 import { hmacSha256 } from "@/lib/hmac";
 
 const BodySchema = z.object({

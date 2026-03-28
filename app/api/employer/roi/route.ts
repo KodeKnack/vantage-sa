@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Role } from "@prisma/client";
-import { requireRole } from "@/lib/auth";
+import { requireRole } from "@/lib/require-role";
 import { calculateROI } from "@/lib/bbee";
 
 const BodySchema = z.object({
@@ -20,4 +20,3 @@ export async function POST(req: Request) {
   const { hireCount, annualPayroll } = parsed.data;
   return NextResponse.json(calculateROI(hireCount, annualPayroll));
 }
-

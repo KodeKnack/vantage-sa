@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth";
+import { requireRole } from "@/lib/require-role";
 import { Role } from "@prisma/client";
 
 const BodySchema = z.object({

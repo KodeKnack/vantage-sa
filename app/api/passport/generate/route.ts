@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Role } from "@prisma/client";
-import { getSession } from "@/lib/auth";
+import { getSafeSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateTrustScore } from "@/lib/trust-score";
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -9,7 +9,7 @@ import { createPassportDoc } from "@/components/passport/VantagePassport";
 export const runtime = "nodejs";
 
 export async function GET(req: Request) {
-  const session = await getSession();
+  const session = await getSafeSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

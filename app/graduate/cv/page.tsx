@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+import { getSafeSession } from "@/lib/auth";
 import CVUpload from "@/components/dashboard/CVUpload";
 
 export default async function GraduateCVPage() {
-  const session = await getSession();
+  const session = await getSafeSession();
   if (!session) redirect("/login");
   if (session.user.role !== "GRADUATE") redirect("/");
 

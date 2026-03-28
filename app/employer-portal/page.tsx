@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+import { getSafeSession } from "@/lib/auth";
 
 export default async function EmployerPortalPage() {
-  const session = await getSession();
+  const session = await getSafeSession();
   if (session?.user?.role === "EMPLOYER") redirect("/employer/dashboard");
   if (session?.user?.role === "GRADUATE") redirect("/graduate/dashboard");
 

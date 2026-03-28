@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+import { getSafeSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { calculateTrustScore } from "@/lib/trust-score";
 import VPSRing from "@/components/dashboard/VPSRing";
 
 export default async function GraduateDashboardPage() {
-  const session = await getSession();
+  const session = await getSafeSession();
   if (!session) redirect("/login");
 
   let aptitudeScore = 0;

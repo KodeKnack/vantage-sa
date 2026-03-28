@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+import { getSafeSession } from "@/lib/auth";
 import { getTaskById } from "@/lib/tasks";
 import ChallengeRunner from "./runner";
 
@@ -8,7 +8,7 @@ export default async function ChallengePage({
 }: {
   params: Promise<{ taskId: string }>;
 }) {
-  const session = await getSession();
+  const session = await getSafeSession();
   if (!session) redirect("/login");
   if (session.user.role !== "GRADUATE") redirect("/");
 

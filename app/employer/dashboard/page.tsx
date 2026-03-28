@@ -1,9 +1,9 @@
-import { getSession } from "@/lib/auth";
+import { getSafeSession } from "@/lib/auth";
 import ROIDashboard from "@/components/employer/ROIDashboard";
 import TalentTable from "@/components/employer/TalentTable";
 
 export default async function EmployerDashboardPage() {
-  const session = await getSession();
+  const session = await getSafeSession();
   if (!session) {
     return (
       <main className="mx-auto max-w-4xl px-6 pt-28 pb-10 text-white">

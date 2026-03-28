@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Role } from "@prisma/client";
-import { requireRole } from "@/lib/auth";
+import { requireRole } from "@/lib/require-role";
 import { prisma } from "@/lib/prisma";
 import { parseCV } from "@/lib/affinda";
 

@@ -1,9 +1,9 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+import { getSafeSession } from "@/lib/auth";
 
 export default async function Home() {
-  const session = await getSession();
+  const session = await getSafeSession();
   if (session?.user?.role === "GRADUATE") redirect("/graduate/dashboard");
   if (session?.user?.role === "EMPLOYER") redirect("/employer/dashboard");
 
