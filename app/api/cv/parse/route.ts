@@ -32,10 +32,18 @@ export async function POST(req: Request) {
   const buffer = Buffer.from(await file.arrayBuffer());
   const parsed = await parseCV(buffer, file.name);
 
-  const existing = await prisma.skill.findMany({
-    where: { userId: session.user.id },
-    select: { name: true },
-  });
+  let existing: { name: string }[] = [];
+  try {
+    existing = await prisma.skill.findMany({
+      where: { userId: session.user.id },
+      select: { name: true },
+    });
+  } catch {
+    // DB unreachable — use mock skills for the signed-in user
+    const { MOCK_GRADUATES } = await import("@/lib/mock-data");
+    const mockUser = MOCK_GRADUATES.find((g) => g.email === session.user.email);
+    existing = mockUser?.skills.map((s) => ({ name: s.name })) ?? [];
+  }
   const existingNames = new Set(existing.map((s) => s.name.toLowerCase()));
 
   const toCreate = parsed.skills.filter((s) => !existingNames.has(s.toLowerCase()));

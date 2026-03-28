@@ -10,3 +10,5 @@ export async function getSafeSession(): Promise<Session | null> {
   }
 }
 
+// Alias used across graduate pages
+export const getSession = getSafeSession;
