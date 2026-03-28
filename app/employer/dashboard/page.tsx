@@ -1,4 +1,5 @@
-import { getSafeSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
 import ROIDashboard from "@/components/employer/ROIDashboard";
 import { MOCK_GRADUATES, MOCK_EMPLOYER, MOCK_ROI_DEFAULTS } from '@/lib/mock-data';
 
@@ -16,17 +17,9 @@ type GraduateLike = {
 };
 
 export default async function EmployerDashboardPage() {
-  const session = await getSafeSession();
-  if (!session) {
-    return (
-      <main className="mx-auto max-w-4xl px-6 pt-28 pb-10 text-white">
-        <h1 className="text-2xl font-semibold">Employer dashboard</h1>
-        <p className="mt-2 text-white/60">
-          Please sign in to view the talent pool and ROI calculator.
-        </p>
-      </main>
-    );
-  }
+  const session = await getSession();
+  if (!session) redirect('/login');
+  if ((session.user as any).role !== 'EMPLOYER') redirect('/login');
 
   let graduates: GraduateLike[] = [];
   try {
@@ -37,10 +30,7 @@ export default async function EmployerDashboardPage() {
     })) as unknown as GraduateLike[];
     if (!graduates.length) throw new Error('empty');
   } catch {
-    graduates = MOCK_GRADUATES.map((g) => ({
-      ...g,
-      verifiedSkills: g.skills,
-    }));
+    graduates = MOCK_GRADUATES;
   }
 
   return (
