@@ -13,7 +13,6 @@ export default async function GraduateDashboardPage() {
   let verified = 0;
   let total = 0;
   let skills: Array<{ id: string; name: string; isVerified: boolean }> = [];
-  let dbError: string | null = null;
 
   try {
     const user = await prisma.user.findUnique({
@@ -29,11 +28,8 @@ export default async function GraduateDashboardPage() {
         name: s.name,
         isVerified: s.isVerified,
       }));
-    } else {
-      dbError = "User not found in database (run `npm run db:setup`).";
     }
   } catch {
-    dbError = "Database not connected. Set DATABASE_URL and run migrations.";
   }
 
   const trustScore = calculateTrustScore({
@@ -76,12 +72,6 @@ export default async function GraduateDashboardPage() {
           </a>
         </div>
       </div>
-
-      {dbError ? (
-        <div className="mt-6 rounded-xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
-          {dbError}
-        </div>
-      ) : null}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
         <div className="rounded-2xl border border-white/10 bg-white/[0.03]">
