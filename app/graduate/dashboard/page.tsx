@@ -2,7 +2,6 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSafeSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { calculateTrustScore } from "@/lib/trust-score";
 import VPSRing from "@/components/dashboard/VPSRing";
 import { MOCK_GRADUATES } from '@/lib/mock-data';
 
@@ -40,11 +39,10 @@ export default async function GraduateDashboardPage() {
     graduateEmail = mock.email;
   }
 
-  const trustScore = calculateTrustScore({
-    aptitudeScore,
-    verifiedSkillCount,
-    totalSkillCount,
-  });
+  const vps = Math.min(100, Math.round(
+    0.6 * aptitudeScore +
+    (totalSkillCount > 0 ? (verifiedSkillCount / totalSkillCount) : 0) * 100 * 0.4
+  ));
 
   return (
     <main className="mx-auto max-w-6xl px-6 pt-28 pb-10 text-white">
@@ -85,7 +83,7 @@ export default async function GraduateDashboardPage() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
         <div className="rounded-2xl border border-white/10 bg-white/[0.03]">
-          <VPSRing vps={trustScore} />
+          <VPSRing vps={vps} />
           <div className="border-t border-white/10 px-6 py-4 text-sm text-white/70">
             Aptitude score: <span className="font-mono text-white">{aptitudeScore}</span>
             <div className="mt-1">
