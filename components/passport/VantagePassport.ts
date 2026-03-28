@@ -60,7 +60,7 @@ function ringSvg(vps: number) {
   const radius = 46;
   const circumference = 2 * Math.PI * radius;
   const pct = Math.max(0, Math.min(100, vps)) / 100;
-  const dashOffset = circumference * (1 - pct);
+  const filled = circumference * pct;
 
   // Small, reliable ring using SVG primitives supported by react-pdf.
   return React.createElement(
@@ -84,8 +84,7 @@ function ringSvg(vps: number) {
         stroke: "#2ECC8F",
         strokeWidth: 10,
         fill: "none",
-        strokeDasharray: `${circumference} ${circumference}`,
-        strokeDashoffset: dashOffset,
+        strokeDasharray: `${filled} ${circumference}`,
         strokeLinecap: "round",
         transform: "rotate(-90 60 60)",
       }),

@@ -60,7 +60,7 @@ export async function parseCV(buffer: Buffer, fileName: string): Promise<Affinda
   if (!apiKey) return mockAffindaResult();
 
   const form = new FormData();
-  form.append("file", new Blob([buffer]), fileName);
+  form.append("file", new Blob([new Uint8Array(buffer)]), fileName);
 
   const res = await fetch("https://api.affinda.com/v2/resumes", {
     method: "POST",
@@ -89,4 +89,3 @@ export async function parseCV(buffer: Buffer, fileName: string): Promise<Affinda
 
   return { name, email, skills: uniqSkills(skills) };
 }
-

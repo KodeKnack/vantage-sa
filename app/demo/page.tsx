@@ -8,17 +8,14 @@ export default function DemoPage() {
 
   async function loginAs(role: "graduate" | "employer") {
     setBusy(role);
-    // If demo bypass is enabled, avoid NextAuth cookies entirely.
-    const bypassEnabled =
-      process.env.NEXT_PUBLIC_DEMO_BYPASS_AUTH === "1" &&
-      process.env.NODE_ENV !== "production";
+    // Prefer bypass when available; fall back to NextAuth credentials.
+    const bypassRes = await fetch("/api/demo/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: role === "graduate" ? "GRADUATE" : "EMPLOYER" }),
+    });
 
-    if (bypassEnabled) {
-      await fetch("/api/demo/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: role === "graduate" ? "GRADUATE" : "EMPLOYER" }),
-      });
+    if (bypassRes.ok) {
       window.location.href =
         role === "graduate" ? "/graduate/dashboard" : "/employer/dashboard";
       return;
@@ -61,7 +58,8 @@ export default function DemoPage() {
         </div>
 
         <div className="mt-6 text-xs text-white/50">
-          If NextAuth is enabled, run <span className="font-mono">npm run db:setup</span>.
+          If demo bypass is unavailable, configure <span className="font-mono">DATABASE_URL</span>{" "}
+          and run <span className="font-mono">npm run db:setup</span>.
         </div>
       </div>
     </main>

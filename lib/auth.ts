@@ -1,12 +1,12 @@
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import type { Role } from "@prisma/client";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/nextauth-options";
 import { getRoleFromCookie, isDemoBypassEnabled } from "@/lib/demo-bypass";
 
 export async function getSession() {
   if (isDemoBypassEnabled()) {
-    const role = getRoleFromCookie();
+    const role = await getRoleFromCookie();
     if (!role) return null;
     return {
       user: {
@@ -18,7 +18,12 @@ export async function getSession() {
       expires: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     };
   }
-  return getServerSession(authOptions);
+  try {
+    return await getServerSession(authOptions);
+  } catch {
+    // Common in dev when NEXTAUTH_SECRET changes or stale cookies exist.
+    return null;
+  }
 }
 
 export async function requireRole(role: Role) {
