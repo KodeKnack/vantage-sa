@@ -4,6 +4,7 @@ import { getSafeSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import VPSRing from "@/components/dashboard/VPSRing";
 import { MOCK_GRADUATES } from '@/lib/mock-data';
+import { Check } from "lucide-react";
 
 export default async function GraduateDashboardPage() {
   const session = await getSafeSession();
@@ -103,29 +104,38 @@ export default async function GraduateDashboardPage() {
             Complete challenges to verify skills and earn proof hashes on your passport.
           </div>
 
-          <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {skills.length === 0 ? (
               <div className="text-sm text-white/50">No skills yet. Upload your CV.</div>
             ) : (
               skills.map((s) => (
                 <div
                   key={s.id}
-                  className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm ${
-                    s.isVerified
-                      ? "border-emerald-500/20 bg-emerald-500/5"
-                      : "border-amber-500/20 bg-amber-500/5"
-                  }`}
+                  className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3"
                 >
-                  <span className="text-white/90">{s.name}</span>
-                  <span
-                    className={`rounded-full px-2 py-1 text-[10px] font-medium ${
-                      s.isVerified
-                        ? "bg-emerald-500/15 text-emerald-200"
-                        : "bg-amber-500/15 text-amber-200"
-                    }`}
-                  >
-                    {s.isVerified ? "✓ Verified" : "⏳ Untested"}
-                  </span>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium text-white/90">
+                        {s.name}
+                      </div>
+                      {s.isVerified && s.proofHash ? (
+                        <div className="mt-1 font-mono text-[11px] text-white/55">
+                          proof: {s.proofHash.slice(0, 8)}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {s.isVerified ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-1 text-[10px] font-medium text-emerald-200">
+                        <Check className="h-3 w-3" />
+                        Verified
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-full bg-white/10 px-2 py-1 text-[10px] font-medium text-white/70">
+                        Unverified
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))
             )}
