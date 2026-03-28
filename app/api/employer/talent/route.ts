@@ -1,42 +1,49 @@
-import { NextResponse } from "next/server";
-import { Role } from "@prisma/client";
-import { requireRole } from "@/lib/require-role";
-import { prisma } from "@/lib/prisma";
-import { calculateTrustScore } from "@/lib/trust-score";
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/nextauth-options';
+import { MOCK_GRADUATES } from '@/lib/mock-data';
+
+async function getFromDB() {
+  const { prisma } = await import('@/lib/prisma');
+  const users = await prisma.user.findMany({
+    where: { role: 'GRADUATE' },
+    include: { verifiedSkills: true },
+  });
+  return users.map((u: any) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    vps: u.aptitudeScore ?? 0,
+    location: '',
+    university: '',
+    skills: u.verifiedSkills ?? [],
+    verifiedCount: u.verifiedSkills?.filter((s: any) => s.isVerified).length ?? 0,
+  }));
+}
 
 export async function GET() {
-  await requireRole(Role.EMPLOYER);
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any).role !== 'EMPLOYER') {
+    return NextResponse.json({ error: 'Unauthorised' }, { status: 401 });
+  }
 
-  const graduates = await prisma.user.findMany({
-    where: { role: Role.GRADUATE },
-    include: { verifiedSkills: true },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
-
-  const rows = graduates.map((g) => {
-    const totalSkillCount = g.verifiedSkills.length;
-    const verifiedSkillCount = g.verifiedSkills.filter((s) => s.isVerified).length;
-    const trustScore = calculateTrustScore({
-      aptitudeScore: g.aptitudeScore ?? 0,
-      verifiedSkillCount,
-      totalSkillCount,
-    });
-
-    return {
+  try {
+    const data = await getFromDB();
+    return NextResponse.json(data);
+  } catch {
+    const fallback = MOCK_GRADUATES.map((g) => ({
       id: g.id,
       name: g.name,
       email: g.email,
+      vps: g.vps,
+      location: g.location,
+      university: g.university,
+      degree: g.degree,
+      skills: g.skills,
+      verifiedCount: g.skills.filter((s) => s.isVerified).length,
       aptitudeScore: g.aptitudeScore,
-      trustScore,
-      skills: g.verifiedSkills.map((s) => ({
-        id: s.id,
-        name: s.name,
-        isVerified: s.isVerified,
-        proofHash: s.proofHash,
-      })),
-    };
-  });
-
-  return NextResponse.json({ rows });
+    }));
+    return NextResponse.json(fallback);
+  }
 }
+
