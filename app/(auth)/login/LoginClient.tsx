@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { GraduationCap, Briefcase, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -29,7 +28,6 @@ const ROLES = [
 
 export default function LoginClient() {
   const [loading, setLoading] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleRoleSelect = async (role: (typeof ROLES)[number]) => {
     setLoading(role.key);
@@ -38,15 +36,17 @@ export default function LoginClient() {
         email: role.email,
         password: role.password,
         redirect: false,
+        callbackUrl: role.redirect,
       });
 
-      if (result?.error) {
+      if (!result || result.error) {
         toast.error('Something went wrong. Please try again.');
         setLoading(null);
         return;
       }
 
-      router.push(role.redirect);
+      // Hard navigate to force middleware to re-evaluate with the new session
+      window.location.href = role.redirect;
     } catch {
       toast.error('Something went wrong. Please try again.');
       setLoading(null);
@@ -107,4 +107,3 @@ export default function LoginClient() {
     </div>
   );
 }
-

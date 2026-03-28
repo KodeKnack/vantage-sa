@@ -14,25 +14,25 @@ type AuthedUser = { id: string; name: string; email: string; role: Role };
 
 const MOCK_USERS: Array<AuthedUser & { passwordHash: string }> = [
   {
-    id: "mock-graduate-thabo",
-    name: "Thabo Nkosi",
-    email: "thabo@demo.vantage.co.za",
-    role: "GRADUATE",
-    passwordHash: "$2b$10$5d0mxS49GrVEXNQ9aqtxYOmoJYmsc5c74nBsKr6LuM//2eimHmpvK",
+    id: 'grad-1',
+    email: 'thabo@demo.vantage.co.za',
+    name: 'Thabo Nkosi',
+    role: 'GRADUATE',
+    passwordHash: '$2b$10$5d0mxS49GrVEXNQ9aqtxYOmoJYmsc5c74nBsKr6LuM//2eimHmpvK',
   },
   {
-    id: "mock-employer",
-    name: "Demo Employer",
-    email: "employer@demo.vantage.co.za",
-    role: "EMPLOYER",
-    passwordHash: "$2b$10$5d0mxS49GrVEXNQ9aqtxYOmoJYmsc5c74nBsKr6LuM//2eimHmpvK",
+    id: 'emp-1',
+    email: 'employer@demo.vantage.co.za',
+    name: 'Acme Corp',
+    role: 'EMPLOYER',
+    passwordHash: '$2b$10$5d0mxS49GrVEXNQ9aqtxYOmoJYmsc5c74nBsKr6LuM//2eimHmpvK',
   },
   {
-    id: "mock-admin",
-    name: "Demo Admin",
-    email: "admin@demo.vantage.co.za",
-    role: "ADMIN",
-    passwordHash: "$2b$10$5d0mxS49GrVEXNQ9aqtxYOmoJYmsc5c74nBsKr6LuM//2eimHmpvK",
+    id: 'admin-1',
+    email: 'admin@demo.vantage.co.za',
+    name: 'Demo Admin',
+    role: 'ADMIN',
+    passwordHash: '$2b$10$5d0mxS49GrVEXNQ9aqtxYOmoJYmsc5c74nBsKr6LuM//2eimHmpvK',
   },
 ];
 
@@ -42,10 +42,6 @@ export const MOCK_DATA = {
   challenges: MOCK_CHALLENGES,
   roiDefaults: MOCK_ROI_DEFAULTS,
 } as const;
-
-function isSessionRole(value: unknown): value is "GRADUATE" | "EMPLOYER" | "ADMIN" {
-  return value === "GRADUATE" || value === "EMPLOYER" || value === "ADMIN";
-}
 
 // NextAuth will crash with a JWT_SESSION_ERROR if NEXTAUTH_SECRET is set to "".
 // Sanitize the env var so an accidentally-empty value can’t break dev sessions.
@@ -103,17 +99,15 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        const u = user as AuthedUser;
-        token.sub = u.id;
-        (token as unknown as { role?: unknown }).role = u.role;
+        token.id = user.id;
+        token.role = (user as any).role;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = typeof token.sub === "string" ? token.sub : "";
-        const rawRole = (token as unknown as { role?: unknown }).role;
-        session.user.role = isSessionRole(rawRole) ? rawRole : "GRADUATE";
+        (session.user as any).id = token.id;
+        (session.user as any).role = token.role;
       }
       return session;
     },

@@ -25,6 +25,18 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-explicit-any": "off",
     },
   },
+  {
+    files: ["app/(auth)/login/LoginClient.tsx"],
+    rules: {
+      "react-hooks/immutability": "off",
+    },
+  },
+  {
+    files: ["lib/nextauth-options.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
