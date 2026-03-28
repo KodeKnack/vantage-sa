@@ -3,6 +3,12 @@ import bcrypt from "bcryptjs";
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
+import {
+  MOCK_CHALLENGES,
+  MOCK_EMPLOYER,
+  MOCK_GRADUATES,
+  MOCK_ROI_DEFAULTS,
+} from "@/lib/mock-data";
 
 type AuthedUser = { id: string; name: string; email: string; role: Role };
 
@@ -12,23 +18,30 @@ const MOCK_USERS: Array<AuthedUser & { passwordHash: string }> = [
     name: "Thabo Nkosi",
     email: "thabo@demo.vantage.co.za",
     role: "GRADUATE",
-    passwordHash: "$2b$10$b5gVBmzAalM1hM15WjuMdOO8H7BbRjG8bQhPK4Vo8vbgHHGVVkQHy",
+    passwordHash: "$2b$10$5d0mxS49GrVEXNQ9aqtxYOmoJYmsc5c74nBsKr6LuM//2eimHmpvK",
   },
   {
     id: "mock-employer",
     name: "Demo Employer",
     email: "employer@demo.vantage.co.za",
     role: "EMPLOYER",
-    passwordHash: "$2b$10$b5gVBmzAalM1hM15WjuMdOO8H7BbRjG8bQhPK4Vo8vbgHHGVVkQHy",
+    passwordHash: "$2b$10$5d0mxS49GrVEXNQ9aqtxYOmoJYmsc5c74nBsKr6LuM//2eimHmpvK",
   },
   {
     id: "mock-admin",
     name: "Demo Admin",
     email: "admin@demo.vantage.co.za",
     role: "ADMIN",
-    passwordHash: "$2b$10$b5gVBmzAalM1hM15WjuMdOO8H7BbRjG8bQhPK4Vo8vbgHHGVVkQHy",
+    passwordHash: "$2b$10$5d0mxS49GrVEXNQ9aqtxYOmoJYmsc5c74nBsKr6LuM//2eimHmpvK",
   },
 ];
+
+export const MOCK_DATA = {
+  graduates: MOCK_GRADUATES,
+  employer: MOCK_EMPLOYER,
+  challenges: MOCK_CHALLENGES,
+  roiDefaults: MOCK_ROI_DEFAULTS,
+} as const;
 
 function isSessionRole(value: unknown): value is "GRADUATE" | "EMPLOYER" | "ADMIN" {
   return value === "GRADUATE" || value === "EMPLOYER" || value === "ADMIN";
