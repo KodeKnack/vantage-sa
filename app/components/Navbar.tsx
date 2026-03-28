@@ -64,13 +64,13 @@ export default function Navbar() {
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-3">
           <Link
-            href="/graduate-view"
+            href="/graduate/dashboard"
             className="px-4 py-2 text-sm font-medium text-white/80 hover:text-white border border-white/[0.12] hover:border-white/25 rounded-lg transition-all duration-150 hover:bg-white/[0.04]"
           >
             Graduate view
           </Link>
           <Link
-            href="/employer-portal"
+            href="/employer/dashboard"
             className="px-4 py-2 text-sm font-semibold text-[#0d0d0d] bg-[#3ddc84] hover:bg-[#52e896] rounded-lg transition-all duration-150 shadow-[0_0_16px_rgba(61,220,132,0.25)] hover:shadow-[0_0_24px_rgba(61,220,132,0.35)]"
           >
             Employer portal
@@ -115,14 +115,14 @@ export default function Navbar() {
           })}
           <div className="mt-3 pt-3 border-t border-white/[0.06] flex flex-col gap-2">
             <Link
-              href="/graduate-view"
+              href="/graduate/dashboard"
               onClick={() => setMobileOpen(false)}
               className="px-4 py-3 text-sm font-medium text-white/80 border border-white/[0.12] rounded-lg text-center hover:bg-white/[0.04] transition-colors"
             >
               Graduate view
             </Link>
             <Link
-              href="/employer-portal"
+              href="/employer/dashboard"
               onClick={() => setMobileOpen(false)}
               className="px-4 py-3 text-sm font-semibold text-[#0d0d0d] bg-[#3ddc84] rounded-lg text-center"
             >
