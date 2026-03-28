@@ -6,6 +6,10 @@ import { prisma } from "@/lib/prisma";
 
 type AuthedUser = { id: string; name: string; email: string; role: Role };
 
+function isSessionRole(value: unknown): value is "GRADUATE" | "EMPLOYER" | "ADMIN" {
+  return value === "GRADUATE" || value === "EMPLOYER" || value === "ADMIN";
+}
+
 // NextAuth will crash with a JWT_SESSION_ERROR if NEXTAUTH_SECRET is set to "".
 // Sanitize the env var so an accidentally-empty value can’t break dev sessions.
 if ((process.env.NEXTAUTH_SECRET ?? "").trim() === "") {
@@ -58,15 +62,16 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         const u = user as AuthedUser;
-        token.id = u.id;
-        token.role = u.role;
+        token.sub = u.id;
+        (token as unknown as { role?: unknown }).role = u.role;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id ?? "";
-        session.user.role = token.role as Role;
+        session.user.id = typeof token.sub === "string" ? token.sub : "";
+        const rawRole = (token as unknown as { role?: unknown }).role;
+        session.user.role = isSessionRole(rawRole) ? rawRole : "GRADUATE";
       }
       return session;
     },
